@@ -1,0 +1,8 @@
+<div className="hidden md:block w-px h-20 bg-stone-200"></div>
+<div className="w-full md:w-auto">
+  <CtaButton 
+    text="無料見積もりを依頼する" 
+    subText="24時間受付中・60秒で完了"
+    href="https://example.com/contact"
+  />
+</div>
