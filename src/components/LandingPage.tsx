@@ -486,8 +486,8 @@ export default function LandingPage() {
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className="relative bg-emerald-900 text-white overflow-hidden">
+      {/* Hero Section - スマホファーストビュー最適化 */}
+      <section className="relative bg-emerald-900 text-white overflow-hidden min-h-[calc(100dvh-6rem)] sm:min-h-0 flex flex-col justify-center">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
@@ -500,20 +500,20 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-emerald-900/85"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
-          <div className="flex flex-col items-start">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-20 w-full">
+          <div className="flex flex-col items-start max-w-4xl">
             {/* Text & Badges */}
-            <div className="max-w-4xl mr-auto text-left">
-              <div className="mb-12">
-                <div className="inline-block bg-orange-500 text-white text-sm sm:text-base font-bold px-4 py-1.5 rounded-full mb-6 shadow-md">
+            <div className="w-full text-left">
+              <div className="mb-6 sm:mb-12">
+                <div className="inline-block bg-orange-500 text-white text-sm sm:text-base font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full mb-4 sm:mb-6 shadow-md">
                   創業50年の信頼と実績
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 drop-shadow-lg">
+                <h1 className="text-[2rem] leading-tight sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 drop-shadow-lg sm:leading-tight">
                   築40年の我が家、<br />
-                  あと20年<span className="text-orange-400 inline-block border-b-4 border-orange-400/50 pb-1">安心して住める家</span>に。
+                  あと20年<span className="text-orange-400 inline-block border-b-2 sm:border-b-4 border-orange-400/50 pb-0.5 sm:pb-1">安心して住める家</span>に。
                 </h1>
-                <p className="text-lg sm:text-xl text-emerald-50 mb-8 leading-relaxed max-w-xl mr-auto drop-shadow-md">
-                  完全自社施工の職人が、あなたの家を「わが家」のように守ります。<br />
+                <p className="text-base sm:text-lg lg:text-xl text-emerald-50 mb-6 sm:mb-8 leading-relaxed max-w-xl drop-shadow-md">
+                  完全自社施工の職人が、あなたの家を「わが家」のように守ります。<br className="hidden sm:inline" />
                   小さな修繕から本格的な塗装まで、お任せください。
                 </p>
               </div>
@@ -523,17 +523,17 @@ export default function LandingPage() {
                 {[
                   { 
                     alt: "保証期間 最長15年", 
-                    src: "/assets/warranty_badge.png",
+                    src: "/assets/1.png",
                     fallbackText: "保証期間"
                   },
                   { 
                     alt: "施工実績 5000件以上", 
-                    src: "/assets/achievement_badge.png",
+                    src: "/assets/2.png",
                     fallbackText: "施工実績"
                   },
                   { 
                     alt: "お客様満足度 100%", 
-                    src: "/assets/satisfaction_badge.png",
+                    src: "/assets/3.png",
                     fallbackText: "満足度"
                   },
                 ].map((badge, index) => (
