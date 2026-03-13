@@ -34,6 +34,8 @@ const SectionHeader: React.FC<{ en: string; jp: string; white?: boolean }> = ({ 
 const SurveyCarousel = () => {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [isMobile, setIsMobile] = React.useState(false);
+  const mobileScrollRef = React.useRef<HTMLDivElement | null>(null);
+  const autoScrollPausedRef = React.useRef(false);
   
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -41,6 +43,55 @@ const SurveyCarousel = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  React.useEffect(() => {
+    if (!isMobile) return;
+
+    const el = mobileScrollRef.current;
+    if (!el) return;
+
+    // Respect reduced motion preferences.
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+    if (reduceMotion) return;
+
+    const getStep = () => {
+      const first = el.firstElementChild as HTMLElement | null;
+      if (!first) return 0;
+      const second = first.nextElementSibling as HTMLElement | null;
+      if (second) return second.offsetLeft - first.offsetLeft;
+      return first.getBoundingClientRect().width;
+    };
+
+    const tick = () => {
+      if (autoScrollPausedRef.current) return;
+      const step = getStep();
+      if (!step) return;
+
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+      if (atEnd) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: step, behavior: 'smooth' });
+      }
+    };
+
+    const pause = () => { autoScrollPausedRef.current = true; };
+    const resume = () => { autoScrollPausedRef.current = false; };
+
+    el.addEventListener('touchstart', pause, { passive: true });
+    el.addEventListener('touchend', resume, { passive: true });
+    el.addEventListener('mouseenter', pause);
+    el.addEventListener('mouseleave', resume);
+
+    const id = window.setInterval(tick, 3000);
+    return () => {
+      window.clearInterval(id);
+      el.removeEventListener('touchstart', pause);
+      el.removeEventListener('touchend', resume);
+      el.removeEventListener('mouseenter', pause);
+      el.removeEventListener('mouseleave', resume);
+    };
+  }, [isMobile]);
 
   const surveys = [
     {
@@ -83,7 +134,10 @@ const SurveyCarousel = () => {
   return (
     <div className="relative w-full max-w-6xl mx-auto px-4">
       {/* Mobile View: Horizontal Scroll */}
-      <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 -mx-4 px-4 scrollbar-hide">
+      <div
+        ref={mobileScrollRef}
+        className="md:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 -mx-4 px-4 scrollbar-hide"
+      >
         {surveys.map((item) => (
           <div key={item.id} className="snap-center shrink-0 w-[85vw] bg-white rounded-xl shadow-md border border-stone-200 overflow-hidden">
             <div className="bg-emerald-50 p-3 border-b border-emerald-100 flex justify-between items-center">
@@ -423,7 +477,7 @@ export default function LandingPage() {
               <a href="tel:0120932576" className="block text-3xl font-bold text-emerald-600 font-mono leading-none hover:text-orange-500 transition-colors">
                 0120-932-576
               </a>
-              <p className="text-xs text-stone-400 mt-1">9:00〜18:00 | 土日祝も対応</p>
+              <p className="text-xs text-stone-400 mt-1">8:00〜20:00 | 土日祝も対応</p>
             </div>
           </div>
 
@@ -576,7 +630,10 @@ export default function LandingPage() {
           <FadeInSection>
             <div className="text-center mb-12">
               <h2 className="text-2xl sm:text-3xl font-bold text-emerald-600 mb-4">
-                イワショウはこんなお悩みを解決します
+                イワショウは
+                <br className="sm:hidden" />
+                こんなお悩みを解決します
+              
               </h2>
             </div>
           </FadeInSection>
@@ -752,7 +809,9 @@ export default function LandingPage() {
                 <h3 className="text-xl md:text-3xl font-bold text-stone-800 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 leading-snug">
                   <span className="text-yellow-400 text-4xl md:text-5xl font-serif">“</span>
                   <span>
-                    日本でも数少ない<span className="text-emerald-600 text-2xl md:text-4xl mx-2">自社調色センター</span>を持つ<br className="md:hidden" />プロだから
+                    日本でも数少ない
+                    <br className="md:hidden" />
+                    <span className="text-emerald-600 text-2xl md:text-4xl mx-1">自社調色センター</span>を持つプロだから
                   </span>
                   <span className="text-yellow-400 text-4xl md:text-5xl font-serif">”</span>
                 </h3>
@@ -785,7 +844,8 @@ export default function LandingPage() {
                 {/* CEO Profile */}
                 <div className="flex items-center justify-end gap-4 mt-10 pt-8 border-t border-stone-100">
                    <div className="text-right">
-                      <p className="text-sm text-stone-500 mb-1">株式会社イワショウ 代表取締役</p>
+                      <p className="text-sm text-stone-500 mb-1">株式会社イワショウ</p>
+                      <p className="text-sm text-stone-500 mb-1">代表取締役</p>
                       <p className="text-xl font-bold text-stone-800">岩藤 正宏</p>
                    </div>
                    <div className="w-24 h-24 rounded-lg overflow-hidden bg-stone-200 shadow-md">
@@ -834,7 +894,7 @@ export default function LandingPage() {
                     <p className="text-stone-600 font-bold mb-2">納得のお値打ち価格</p>
                     <h3 className="text-2xl md:text-3xl font-bold text-stone-800">
                       自社工場併設で<br className="md:hidden" />
-                      <span className="text-emerald-600">「理想の色」</span>をオーダーメイド
+                      <span className="text-emerald-600">"理想の色"</span>をオーダーメイド
                     </h3>
                   </div>
 
@@ -982,7 +1042,9 @@ export default function LandingPage() {
                       イワショウなら
                     </div>
                     <h4 className="text-xl md:text-2xl font-bold text-stone-800">
-                      細部までこだわる施工で<span className="text-emerald-700 text-2xl md:text-3xl mx-1">ストレスフリー</span>を実現！
+                      細部までこだわる施工で
+                      <br className="md:hidden" />
+                      <span className="text-emerald-700 text-2xl md:text-3xl mx-1">ストレスフリー</span>を実現！
                     </h4>
                   </div>
                 </div>
@@ -1002,7 +1064,9 @@ export default function LandingPage() {
                     <p className="text-stone-600 font-bold mb-2">きめ細かなアフターフォロー</p>
                     <h3 className="text-2xl md:text-3xl font-bold text-stone-800">
                       工事後も安心の<br className="md:hidden" />
-                      <span className="text-emerald-600">「長期保証」</span>と<span className="text-emerald-600">「定期点検」</span>
+                      <span className="whitespace-nowrap md:whitespace-normal">
+                        <span className="text-emerald-600">「長期保証」</span>と<span className="text-emerald-600">「定期点検」</span>
+                      </span>
                     </h3>
                   </div>
 
@@ -1250,7 +1314,7 @@ export default function LandingPage() {
                 <div className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-stone-100 hover:border-emerald-400 transition-all duration-300 h-full flex flex-col relative group">
                   <div className="h-48 overflow-hidden relative">
                     <img 
-                      src="/assets/c" 
+                      src="/assets/plan_roof.jpg" 
                       alt="屋根塗装" 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
@@ -1421,9 +1485,9 @@ export default function LandingPage() {
                   <div className="grid md:grid-cols-2 gap-8 items-center mb-8">
                     <div className="bg-emerald-50 p-8 rounded-xl text-center border border-emerald-100">
                       <p className="flex items-center justify-center text-2xl md:text-3xl font-bold text-emerald-600 mb-2 font-mono">
-                        <Phone className="w-6 h-6 md:w-8 md:h-8 mr-2" /> 0120-39-4116
+                        <Phone className="w-6 h-6 md:w-8 md:h-8 mr-2" /> 0120-932-576
                       </p>
-                      <p className="text-emerald-800 text-sm font-medium">9:00~18:00 | 火水祝 定休日</p>
+                      <p className="text-emerald-800 text-sm font-medium">8:00~20:00</p>
                     </div>
                     <div>
                       <p className="text-stone-700 leading-relaxed text-lg font-medium">
